@@ -1,17 +1,14 @@
 package com.cqupt.ci;
 
+import java.util.TreeSet;
+
 public class RuleTree {
 
-	/** 
-	 * @Title: main 
-	 * @Description: TODO 
-	 * @param @param args     
-	 * @return void     
-	 * @throws 
-	 */
+	TreeSet<String> tree = new TreeSet<String>();
+
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 }

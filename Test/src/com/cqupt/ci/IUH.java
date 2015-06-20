@@ -10,19 +10,11 @@ import java.util.Scanner;
 
 import com.cqupt.ci.InputData.InfoTableObject;
 
-/**
- * @ClassName: IUVP
- * @Description: TODO
- * @author yao
- * @date 2015-6-17 12:33:06
- * 
- */
-public class IUVP {
+public class IUH {
 
-	public float beta;
 	public InputData data;
-	public BuildVPRS vprs;
-	public BuildVPRS newVprs;
+	public BuildRS rs;
+	public BuildRS newRs;
 	public List<HashSet<String>> eClassSet = new ArrayList<HashSet<String>>();
 	public HashSet<String> targetSet = new HashSet<String>();
 	public HashSet<String> upperSet = new HashSet<String>();
@@ -32,13 +24,12 @@ public class IUVP {
 	public HashSet<String> newLowerSet = new HashSet<String>();
 	public InfoTableObject oneObject;
 
-	public IUVP(InputData data, float beta) {
-		this.beta = beta;
-		this.data=data;
-		vprs = new BuildVPRS(data, beta);
-		this.targetSet = vprs.targetSet;
-		this.upperSet = vprs.upperVpSet;
-		this.lowerSet = vprs.lowerVpSet;
+	public IUH(InputData data) {
+		this.data = data;
+		rs = new BuildRS(data);
+		this.targetSet = rs.targetSet;
+		this.upperSet = rs.upperSet;
+		this.lowerSet = rs.lowerSet;
 	}
 
 	public boolean isChangeTargetX(InfoTableObject oneObject) {
@@ -67,7 +58,7 @@ public class IUVP {
 	}
 
 	public int checkPartition(InfoTableObject oneObject) {
-		for (int i = 0; i < data.rowNum-1; i++) {
+		for (int i = 0; i < data.rowNum - 1; i++) {
 			String[] row = data.infoTable.get(i);
 			ArrayList<String> sRow = new ArrayList<String>(Arrays.asList(row));
 			if (sRow.equals(oneObject.content)) {
@@ -87,7 +78,7 @@ public class IUVP {
 
 	public void add() {
 		oneObject = data.deleteObject();
-		newVprs = new BuildVPRS(data, beta);
+		rs = new BuildRS(data);
 
 		ArrayList<String> one = oneObject.content;
 		if (one != null) {
@@ -156,24 +147,24 @@ public class IUVP {
 				}
 			}
 		}
-	
+
 	}
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		ExcuteTimeTool timeTool = new ExcuteTimeTool();
-		
+
 		Scanner sc = new Scanner(System.in);
-		if(sc.hasNext()){
-			String path= sc.next();
+		if (sc.hasNext()) {
+			String path = sc.next();
 			File file = new File(path);
-			if(file.exists()){
+			if (file.exists()) {
 				timeTool.start();
-				IUVP iuvp = new IUVP(new InputData(path), 0.4f);
-				iuvp.delete();
+				IUH iuh = new IUH(new InputData(path));
+				iuh.delete();
 				timeTool.end();
-				System.out.println("excute Time "+timeTool.durtation());
-			}else{
+				System.out.println("excute Time " + timeTool.durtation());
+			} else {
 				System.out.println("file is error.");
 			}
 			sc.close();

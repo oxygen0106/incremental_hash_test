@@ -1,10 +1,13 @@
 package com.cqupt.ci;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 
 public class BuildRS {
 
-	public static InputData Data = new InputData("D:/wine.data.txt");
+	private InputData data;
 
 	private List<String> targetX = new ArrayList<String>();
 	private List<List<String>> equivalencePartition = new ArrayList<List<String>>();
@@ -12,23 +15,28 @@ public class BuildRS {
 	HashSet<String> targetSet;
 	HashSet<String> upperSet;
 	HashSet<String> lowerSet;
-	List<HashSet<String>> eClassSet = new ArrayList<HashSet<String>>(); 
+	List<HashSet<String>> eClassSet = new ArrayList<HashSet<String>>();
 
-	public void init() {
-
+	public BuildRS(InputData data) {
+		this.data = data;
+		this.computeEquivalenceClass(data.infoTable, 0);
+		this.computeTargetSet(data.infoTable, 1);
+		this.convertSet();
+		this.computeLower();
+		this.computeUpper();
 	}
 
 	private void computeEquivalenceClass(List<String[]> table, int remove) {
-		for (int i = 0; i < Data.rowNum; i++) {
-			String[] row = Data.infoTable.get(i);
+		for (int i = 0; i < data.rowNum-1; i++) {
+			String[] row = data.infoTable.get(i);
 			ArrayList<String> sRow = new ArrayList<String>(Arrays.asList(row));
 			if (remove != -1) {
 				sRow.remove(remove);
 			}
 			ArrayList<String> e = new ArrayList<String>();
-			for (int j = 0; j < Data.rowNum; j++) {
+			for (int j = 0; j < data.rowNum-1; j++) {
 				ArrayList<String> d = new ArrayList<String>(
-						Arrays.asList(Data.infoTable.get(j)));
+						Arrays.asList(data.infoTable.get(j)));
 				if (remove != -1) {
 					d.remove(remove);
 				}
@@ -44,22 +52,22 @@ public class BuildRS {
 
 	private void computeTargetSet(List<String[]> table, int desion) {
 
-		String[] row = Data.infoTable.get(0);
-//		String desionAtt = row[Data.columnNum - 1];
-		String desionAtt = row[0];
+		String[] row = data.infoTable.get(0);
+		String desionAtt = row[data.columnNum - 1];
+		
 		if (desion != 1) {
-			for (int i = 0; i < Data.rowNum; i++) {
-				String[] row2 = Data.infoTable.get(i);
-				if (!desionAtt.equals(row2[Data.columnNum - 1])) {
-					desionAtt = row2[Data.columnNum - 1];
+			for (int i = 0; i < data.rowNum-1; i++) {
+				String[] row2 = data.infoTable.get(i);
+				if (!desionAtt.equals(row2[data.columnNum - 1])) {
+					desionAtt = row2[data.columnNum - 1];
 					// System.out.println(desionAtt+"deA");
 					break;
 				}
 			}
 		}
 
-		for (int j = 0; j < Data.rowNum; j++) {
-			if (Data.infoTable.get(j)[0].equals(desionAtt)) {
+		for (int j = 0; j < data.rowNum-1; j++) {
+			if (data.infoTable.get(j)[data.columnNum - 1].equals(desionAtt)) {
 				targetX.add(j + "");
 			}
 		}
@@ -71,7 +79,7 @@ public class BuildRS {
 		for(List<String> list : equivalencePartition){
 			eClassSet.add(new HashSet<String>(list));
 		}
-		System.out.println("eClassSet"+eClassSet);
+//		System.out.println("eClassSet"+eClassSet);
 	}
 	
 	public void computeUpper() {
@@ -90,14 +98,14 @@ public class BuildRS {
 		}
 	}
 	
-	public void test(){
+	public void testSet(){
 		HashSet<String> set1 = new HashSet<String>();
-		set1.add("1");
-		set1.add("2");
+		set1.add("item11");
+		set1.add("item12");
 		
 		HashSet<String> set2 = new HashSet<String>();
-		set2.add("11");
-		set2.add("21");
+		set2.add("item2");
+		set2.add("item1");
 //		set2.add("4");
 		
 		System.out.println(set1.retainAll(set2));
@@ -115,11 +123,11 @@ public class BuildRS {
 //			}
 //		}
 		
-		System.out.println("--------------------");
+//		System.out.println("--------------------");
 		lowerSet = new HashSet<String>();
 		if(targetSet==null||eClassSet==null){
 			this.convertSet();
-			System.out.println("convertSet");
+//			System.out.println("convertSet");
 		}
 		for(int i=0;i<eClassSet.size()-1;i++){
 			lowerSet.addAll(eClassSet.get(i));
@@ -129,10 +137,11 @@ public class BuildRS {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		System.out.println(Data.rowNum);
-		BuildRS t = new BuildRS();
-		t.computeEquivalenceClass(Data.infoTable, 0);
-		t.computeTargetSet(Data.infoTable, 1);
+		 InputData d= new InputData("D:/zoo.data.txt");
+		System.out.println(d.rowNum);
+		BuildRS t = new BuildRS(d);
+		t.computeEquivalenceClass(d.infoTable, 0);
+		t.computeTargetSet(d.infoTable, 1);
 //		t.computeUpper();
 		System.out.println("eClass.size"+t.equivalencePartition.size());
 		System.out.println(t.equivalencePartition.get(0));
