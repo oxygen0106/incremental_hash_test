@@ -5,6 +5,13 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
+/** 
+* @ClassName: BuildRS 
+* @Description: TODO
+* @author yao
+* @date 2015-6-15 19:05:28 
+*  
+*/
 public class BuildRS {
 
 	private InputData data;

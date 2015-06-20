@@ -11,7 +11,7 @@ import java.util.Scanner;
  * @ClassName: InputData
  * @Description: TODO
  * @author yao
- * @date 2015-6-19 下午1:45:26
+ * @date 2015-6-19 21:45:26
  * 
  */
 public class InputData {

@@ -7,8 +7,8 @@ import java.util.List;
 /**
  * @ClassName: VPRS
  * @Description: TODO
- * @author maxyao
- * @date 2015-6-20 下午2:37:48
+ * @author yao
+ * @date 2015-6-19 22:37:48
  * 
  */
 public class BuildVPRS {

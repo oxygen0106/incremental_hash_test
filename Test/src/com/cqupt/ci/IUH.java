@@ -10,11 +10,19 @@ import java.util.Scanner;
 
 import com.cqupt.ci.InputData.InfoTableObject;
 
+/** 
+* @ClassName: IUH 
+* @Description: TODO
+* @author yao
+* @date 2015-6-17 18:05:04 
+*  
+*/
 public class IUH {
 
 	public InputData data;
 	public BuildRS rs;
 	public BuildRS newRs;
+	public RuleTree ruleTree;
 	public List<HashSet<String>> eClassSet = new ArrayList<HashSet<String>>();
 	public HashSet<String> targetSet = new HashSet<String>();
 	public HashSet<String> upperSet = new HashSet<String>();
@@ -30,6 +38,8 @@ public class IUH {
 		this.targetSet = rs.targetSet;
 		this.upperSet = rs.upperSet;
 		this.lowerSet = rs.lowerSet;
+		ruleTree = new RuleTree(data);
+		ruleTree.initRule(rs);
 	}
 
 	public boolean isChangeTargetX(InfoTableObject oneObject) {
@@ -57,23 +67,36 @@ public class IUH {
 		return false;
 	}
 
-	public int checkPartition(InfoTableObject oneObject) {
+	public int checkRuleTree(InfoTableObject oneObject) {
+		if(data==null){
+			return -1;
+		}
 		for (int i = 0; i < data.rowNum - 1; i++) {
 			String[] row = data.infoTable.get(i);
 			ArrayList<String> sRow = new ArrayList<String>(Arrays.asList(row));
 			if (sRow.equals(oneObject.content)) {
-				return i;
+				if(ruleTree!=null){
+					boolean res = ruleTree.ruleTree.containsAll(oneObject.content);
+					if(res==true){
+						return i;
+					}
+				}
 			}
 		}
 		return -1;
 	}
 
-	// relative degree of misclassification: rdm
-	public float computeRdm(HashSet<String> e) {
+	
+	public RuleTree recreateTree(HashSet<String> e) {
+		RuleTree tree = new RuleTree(data);
 		HashSet<String> set = new HashSet<String>();
 		set.addAll(e);
 		set.retainAll(newTargetSet);
-		return 1f - (((float) set.size()) / ((float) e.size()));
+		if(!tree.ruleTree.isEmpty()&&!tree.ruleTree.contains(set)){
+			tree.ruleTree.addAll(set);
+			return tree;
+		}
+		return tree;
 	}
 
 	public void add() {
@@ -88,23 +111,27 @@ public class IUH {
 				targetSet.remove(String.valueOf(oneObject.id));
 				newTargetSet = targetSet;
 			}
-			int r = checkPartition(oneObject);
+			int r = checkRuleTree(oneObject);
 			if (r != -1) {
 				for (int i = 0; i < eClassSet.size() - 1; i++) {
 					if (eClassSet.get(i).contains(r)) {
 						HashSet<String> e = eClassSet.get(i);
 						e.add(String.valueOf(oneObject.id));
-						float rdm = computeRdm(e);
-						if (rdm > beta) {
+						recreateTree(e);
+						if (ruleTree.ruleTree.contains(oneObject.content)) {
 							HashSet<String> set = new HashSet<String>();
 							set.addAll(lowerSet);
 							set.retainAll(e);
 							newLowerSet = set;
-						}
-						if (rdm <= (1 - beta)) {
+						}else{
+							HashSet<String> set = new HashSet<String>();
+							set.addAll(lowerSet);
+							set.retainAll(e);
+							newLowerSet = set;
 							newUpperSet.addAll(upperSet);
 							newUpperSet.addAll(e);
 						}
+						
 					}
 
 				}
@@ -113,9 +140,8 @@ public class IUH {
 	}
 
 	public void delete() {
-
 		oneObject = data.deleteObject();
-		newVprs = new BuildVPRS(data, beta);
+		rs = new BuildRS(data);
 
 		ArrayList<String> one = oneObject.content;
 		if (one != null) {
@@ -125,29 +151,32 @@ public class IUH {
 				targetSet.remove(String.valueOf(oneObject.id));
 				newTargetSet = targetSet;
 			}
-			int r = checkPartition(oneObject);
+			int r = checkRuleTree(oneObject);
 			if (r != -1) {
 				for (int i = 0; i < eClassSet.size() - 1; i++) {
 					if (eClassSet.get(i).contains(r)) {
 						HashSet<String> e = eClassSet.get(i);
 						e.add(String.valueOf(oneObject.id));
-						float rdm = computeRdm(e);
-						if (rdm > beta) {
+						recreateTree(e);
+						if (ruleTree.ruleTree.contains(oneObject.content)) {
 							HashSet<String> set = new HashSet<String>();
 							set.addAll(lowerSet);
 							set.retainAll(e);
 							newLowerSet = set;
-						}
-						if (rdm <= (1 - beta)) {
+						}else{
+							HashSet<String> set = new HashSet<String>();
+							set.addAll(lowerSet);
+							set.retainAll(e);
+							newLowerSet = set;
 							newUpperSet.addAll(upperSet);
 							newUpperSet.remove(e);
 						}
+						
 					}
 
 				}
 			}
 		}
-
 	}
 
 	public static void main(String[] args) {
@@ -162,6 +191,7 @@ public class IUH {
 				timeTool.start();
 				IUH iuh = new IUH(new InputData(path));
 				iuh.delete();
+				iuh.add();
 				timeTool.end();
 				System.out.println("excute Time " + timeTool.durtation());
 			} else {
